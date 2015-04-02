@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-# Author :  Khoi Phan (tienkhoi0605@gmail.com)
-# Last Edit : Myeong-Uk (fantazm@skku.edu)
-# Date : 2015. 04. 03
-# Command : <python colors.py>
+ 
 # items.py should be in the same folder
-
 from items import item_color
 from collections import OrderedDict
  
@@ -61,13 +56,20 @@ def max_cover_inclusive(items):
 # @param dict items
 # @return list
 def max_cover_exclusive(items):
-        items = items.copy()
-        (covered, keys) = (set(), list())
-        while True:
-                key = get_max_uncover_exclusive_item(covered, items)
-                if not key: return keys
-                covered = covered.union(items.pop(key))
-                keys.append(key)
+        solns = {}
+        # greedy algorithm start from each value
+        for k in items:
+                i = items.copy()
+                # initial row
+                (covered, keys) = (items[k], [k])
+                while True:
+                        key = get_max_uncover_exclusive_item(covered, i)
+                        if not key:
+                                solns[len(covered)] = keys
+                                break
+                        covered = covered.union(i.pop(key))
+                        keys.append(key)
+        return solns[max(solns, key=int)]
  
 # third function
 # @param int k
@@ -113,3 +115,5 @@ if __name__ == '__main__':
         all_values3 = union(result3, item_color);
         print(str(len(result3)) + "-" +  str(len(all_values3)))
         print(result3)
+
+        #https://github.com/songmw90/SKKU/blob/master/ECE5924/colors.py
