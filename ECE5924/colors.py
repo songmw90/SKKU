@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
- 
+
 # items.py should be in the same folder
 from items import item_color
-from collections import OrderedDict
- 
+
+# helper function for distinct check
 def are_exclusive(keys, items):
         sets = [ items[k] for k in keys ]
         return not bool(set.intersection(*sets))
- 
+
+# helper function for union
 def union(keys, items):
         sets = [ items[k] for k in keys ]
         return set.union(*sets)
- 
+
 # helper function: greedy inclusive maximum uncovered values
 # @param set current
 # @param dict items
@@ -25,7 +26,7 @@ def get_max_uncover_inclusive_item(current, items):
                         max_diff = diff
                         key = k
         return key
- 
+
 # helper function: greedy exclusive maximum uncovered values
 # @param set current
 # @param dict items
@@ -39,81 +40,103 @@ def get_max_uncover_exclusive_item(current, items):
                                 max_diff = diff
                                 key = k
         return key
- 
-# first function
+
+# first problem
 # @param dict items
 # @return list
 def max_cover_inclusive(items):
-        items = items.copy()
-        (covered, keys) = (set(), list())
-        while True:
-                key = get_max_uncover_inclusive_item(covered, items)
-                if not key: return keys
-                covered = covered.union(items.pop(key))
-                keys.append(key)
- 
-# second function
+        solns = {}
+        for key in items:
+                i = items.copy()
+                (covered, keys) = (i[key], [key])
+                while True:
+                        key = get_max_uncover_inclusive_item(covered, i)
+                        if not key:
+                                t = len(covered)
+                                if t in solns and len(solns[t]) < len(keys): break
+                                solns[t] = keys
+                                break
+                        covered = covered.union(i.pop(key))
+                        keys.append(key)
+        return solns[max(solns)]
+
+# second problem
 # @param dict items
 # @return list
 def max_cover_exclusive(items):
         solns = {}
-        # greedy algorithm start from each value
-        for k in items:
+        for key in items:
                 i = items.copy()
-                # initial row
-                (covered, keys) = (items[k], [k])
+                (covered, keys) = (i[key], [key])
                 while True:
                         key = get_max_uncover_exclusive_item(covered, i)
                         if not key:
-                                solns[len(covered)] = keys
+                                t = len(covered)
+                                if t in solns and len(solns[t]) < len(keys): break
+                                solns[t] = keys
                                 break
                         covered = covered.union(i.pop(key))
                         keys.append(key)
-        return solns[max(solns, key=int)]
- 
-# third function
+        return solns[max(solns)]
+
+# third problem
 # @param int k
 # @param dict items
 # @return list
 def max_cover_k(k, items):
-        items = items.copy()
-        (covered, keys) = (set(), list())
-        while len(keys) < k:
-                key = get_max_uncover_inclusive_item(covered, items)
-                covered = covered.union(items.pop(key))
-                keys.append(key)
-        return keys
- 
+        solns = {}
+        for key in items:
+                i = items.copy()
+                (covered, keys) = (i[key], [key])
+                while len(keys) < k:
+                        key = get_max_uncover_exclusive_item(covered, i)
+                        if not key:
+                                t = len(covered)
+                                if t in solns and len(solns[t]) < len(keys): break
+                                solns[t] = keys
+                                break
+                        covered = covered.union(i.pop(key))
+                        keys.append(key)
+                        t = len(covered)
+                        if t in solns and len(solns[t]) < len(keys): pass
+                        solns[len(covered)] = keys
+        return solns[max(solns)]
+
+# -*- case tests -*-
+
+# first case test
+def test_max_cover_inclusive(items):
+        print "Current testcase: {}".format(test_max_cover_inclusive.__name__)
+        result = max_cover_inclusive(items)
+        ex = "True" if are_exclusive(result, items) else "False"
+        u = len(result)
+        l = len(union(result, items))
+        print "Exclusive: {} | Keys: {} | Covered: {}".format(ex, u, l)
+        print result
+
+# second case test
+def test_max_cover_exclusive(items):
+        print "Current testcase: {}".format(test_max_cover_inclusive.__name__)
+        result = max_cover_exclusive(items)
+        ex = "True" if are_exclusive(result, items) else "False"
+        u = len(result)
+        l = len(union(result, items))
+        print "Exclusive: {} | Keys: {} | Covered: {}".format(ex, u, l)
+        print result
+
+# third case test
+def test_max_cover_k(k, items):
+        print "Current testcase: {}".format(test_max_cover_inclusive.__name__)
+        result = max_cover_k(k, items)
+        ex = "True" if are_exclusive(result, items) else "False"
+        u = len(result)
+        l = len(union(result, items))
+        print "Exclusive: {} | Keys: {} | Covered: {}".format(ex, u, l)
+        print result
+
 # main entry
 if __name__ == '__main__':
-
         # test cases
-        cases = OrderedDict()
-        cases['max_cover_inclusive'] = [item_color]
-        cases['max_cover_exclusive'] = [item_color]
-        cases['max_cover_k'] = [5, item_color]
- 
-        # test each case
-        for case in cases:
-                #print 'Current testcase: {}'.format(case) #if using Python 2.7 higher
-                params = cases[case]
-                fn = locals()[case]
-                result = fn(*params)
-
-        result1 = max_cover_inclusive(item_color)
-        result2 = max_cover_exclusive(item_color)
-        result3 = max_cover_k(30, item_color)
-        all_values1 = union(result1, item_color);
-
-        print(str(len(result1)) + "-" + str(len(all_values1)))
-        print(result1)
-        
-        all_values2 = union(result2, item_color);
-        print(str(len(result2)) + "-" + str(len(all_values2)))
-        print(result2)
-        
-        all_values3 = union(result3, item_color);
-        print(str(len(result3)) + "-" +  str(len(all_values3)))
-        print(result3)
-
-        #https://github.com/songmw90/SKKU/blob/master/ECE5924/colors.py
+        test_max_cover_inclusive(item_color)
+        test_max_cover_exclusive(item_color)
+        test_max_cover_k(5, item_color)
