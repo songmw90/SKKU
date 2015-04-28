@@ -54,17 +54,27 @@ class NewGraph(Graph):
     
     #@func: show an edge
     #@param u, v: the nodes of the restored edge
-    #@desc: we get the attribute of the edge and remove it from hidden_edges
+    #@desc: if the node of this edge is hidden, we will show this node
+    #       after that we get the attribute of the edge and remove it from hidden_edges
     #       then we add this edge to graph   
     def show_edge(self, u, v):
+        if self.has_node(u) == False:
+            self.show_node(u)
+        if self.has_node(v) == False:
+            self.show_node(v)
         edge_attr = self.hidden_edges.pop((u, v))
         self.add_edge(u, v, edge_attr)
     
     #@func: show all edges
     #@desc: for each edge in hidden_edges
-    #       we get attribute of that edge and add this node to graph  
+    #       if the node of this edge is hidden, we will show this node
+    #       we get attribute of that edge and add this edge to graph  
     def show_all_edges(self):
         for edge in self.hidden_edges:
+            if self.has_node(edge[0]) == False:
+                self.show_node(edge[0])
+            if self.has_node(edge[1]) == False:
+                self.show_node(edge[1])
             edge_attr = self.hidden_edges[edge]
             self.add_edges_from([edge], edge_attr)
         self.hidden_edges.clear()

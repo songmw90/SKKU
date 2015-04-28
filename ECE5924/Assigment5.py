@@ -55,20 +55,31 @@ class NewGraph(Graph):
     
     #@func: show an edge
     #@param u, v: the nodes of the restored edge
-    #@desc: we get the attribute of the edge and remove it from hidden_edges
+    #@desc: if the node of this edge is hidden, we will show this node
+    #       after that we get the attribute of the edge and remove it from hidden_edges
     #       then we add this edge to graph   
     def show_edge(self, u, v):
+        if self.has_node(u) == False:
+            self.show_node(u)
+        if self.has_node(v) == False:
+            self.show_node(v)
         edge_attr = self.hidden_edges.pop((u, v))
         self.add_edge(u, v, edge_attr)
     
     #@func: show all edges
     #@desc: for each edge in hidden_edges
-    #       we get attribute of that edge and add this node to graph  
+    #       if the node of this edge is hidden, we will show this node
+    #       we get attribute of that edge and add this edge to graph  
     def show_all_edges(self):
         for edge in self.hidden_edges:
+            if self.has_node(edge[0]) == False:
+                self.show_node(edge[0])
+            if self.has_node(edge[1]) == False:
+                self.show_node(edge[1])
             edge_attr = self.hidden_edges[edge]
             self.add_edges_from([edge], edge_attr)
         self.hidden_edges.clear()
+    
     #@func: get the dictionary of nodes in graph
     #       this dictionary helps us drawing the graph with absolutely coordinate 
     #@return a dictionary
@@ -272,14 +283,15 @@ def link_never_been_used(G):
         if edge_attr["flow"] == 0:
             list_link.append(edge)
     return list_link
-#@func: get links which carry no less than 70% of capacity (more than 70%)
+#@func: get links which carry no less than x% of capacity (more than x%)
 #@param G: the graph G
+#@param percent: the percent will be calculate
 #@return the list of edges
-def link_carry_no_less_than_70_percent_of_capacity(G):
+def link_carry_no_less_than_x_percent_of_capacity(G, percent):
     list_link = []
     for edge in G.edges():
         edge_attr = G.get_edge_data(edge[0], edge[1])
-        if round(100 * edge_attr["flow"]/ edge_attr["capacity"], 2) >= 70:
+        if round(100 * edge_attr["flow"]/ edge_attr["capacity"], 2) >= percent:
             list_link.append(edge)
     return list_link
 #@func: draw the graph with flow information
@@ -328,5 +340,5 @@ if __name__ == '__main__':
     never_used_links = link_never_been_used(G)
     print(never_used_links)
     
-    over_70_percent_capacity_links = link_carry_no_less_than_70_percent_of_capacity(G)
+    over_70_percent_capacity_links = link_carry_no_less_than_x_percent_of_capacity(G, 70)
     print(over_70_percent_capacity_links)
